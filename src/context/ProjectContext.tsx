@@ -46,8 +46,6 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
         ...projectData,
       };
 
-      console.log("adding project", newProject);
-
       setProjects((prev) => [...prev, newProject]);
     },
     [],

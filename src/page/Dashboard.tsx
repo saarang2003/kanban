@@ -7,12 +7,6 @@ import type { Project } from "../types";
 const Dashboard: React.FC = () => {
   const { projects, removeProject } = useProjects();
 
-  console.log("projects in dashboard", projects);
-  console.log(
-    "project users in dashboard",
-    projects.map((p) => p.users),
-  );
-
   return (
     <Box sx={{ p: 2 }}>
       <h2>Project List</h2>

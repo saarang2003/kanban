@@ -22,7 +22,6 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const { projects } = useProjects();
-  console.log("projects in sidebar", projects);
   // const projects: string[] = [
   //   "Marketing Campaign",
   //   "Q4 Roadmap",
