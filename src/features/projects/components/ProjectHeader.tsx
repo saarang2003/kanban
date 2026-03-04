@@ -9,6 +9,7 @@ import {
   AppBar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,6 +18,7 @@ import {
   FormControlLabel,
   FormLabel,
   InputLabel,
+  ListItemText,
   MenuItem,
   Radio,
   RadioGroup,
@@ -27,9 +29,10 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
-
-import { useUsers } from "../../context/UserContext";
-import type { Priority, StoryStatus } from "../../types";
+import type { Priority } from "../../../shared/types/common";
+import type { StoryStatus } from "../../stories/types";
+import type { User } from "../../users/types";
+import { useApp } from "../../../shared/context/useApp";
 
 interface ProjectHeaderProps {
   id: string;
@@ -43,6 +46,10 @@ interface ProjectHeaderProps {
     storyPoints: number;
     assignedUserId: string;
   }) => void;
+  priorityfilter: Priority[];
+  setPriorityFilter: (status: Priority[]) => void;
+  userFilter: string;
+  setUserFilter: (userId: string) => void;
 }
 
 export interface Story {
@@ -66,16 +73,27 @@ interface StoryFormData {
   assignedUserId: string;
 }
 
+const MenuProps = {
+  PaperProps: {
+    sx: {
+      maxHeight: "14rem",
+      width: "15.625rem",
+    },
+  },
+};
+
 const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   id,
   title,
   users: projectUserIds,
   addStories,
+  priorityfilter,
+  setPriorityFilter,
+  userFilter,
+  setUserFilter,
 }) => {
-  const [status, setStatus] = useState<StoryStatus>("Backlog");
   const [open, setOpen] = useState<boolean>(false);
-
-  const { users: allUsers } = useUsers();
+  const { users: allUsers } = useApp();
 
   // Filter users assigned to this project
   const projectUsers = useMemo(() => {
@@ -92,6 +110,17 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   };
 
   const [formData, setFormData] = useState<StoryFormData>(initialState);
+
+  const handleStatusChange = (e: SelectChangeEvent<string[]>) => {
+    const { value } = e.target;
+    setPriorityFilter(
+      (typeof value === "string" ? value.split(",") : value) as Priority[],
+    );
+  };
+
+  const handleUserChange = (e: SelectChangeEvent<string>) => {
+    setUserFilter(e.target.value);
+  };
 
   const handleInputChange =
     (field: keyof StoryFormData) =>
@@ -141,7 +170,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
       position="static"
       color="primary"
       elevation={1}
-      sx={{ borderRadius: "5px", mb: 2 }}
+      sx={{ borderRadius: "0.3125rem", mb: "1rem" }}
     >
       <Toolbar
         sx={{
@@ -149,8 +178,8 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           flexDirection: { xs: "column", sm: "row" },
           alignItems: { xs: "flex-start", sm: "center" },
           justifyContent: "space-between",
-          gap: 2,
-          p: 1,
+          gap: "1rem",
+          p: "0.5rem",
         }}
       >
         <Typography>{title}</Typography>
@@ -159,31 +188,112 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
-            gap: 2,
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 1,
+            flexShrink: 0,
             width: { xs: "100%", sm: "auto" },
           }}
         >
           <FormControl
-            sx={{ minWidth: 120, width: { xs: "100%", sm: "auto" } }}
             size="small"
+            sx={{
+              minWidth: { sm: "12.5rem" },
+              width: { xs: "100%", sm: "15.625rem" },
+              mb: { xs: 1, sm: 0 },
+            }}
           >
+            <InputLabel
+              id="demo-simple-select-label"
+              sx={{
+                "&.Mui-focused": { color: "primary.main" },
+                backgroundColor: "white",
+                paddingLeft: "0.25rem",
+                paddingRight: "0.25rem",
+                borderRadius: "0.25rem",
+              }}
+            >
+              User
+            </InputLabel>
             <Select
-              value={status}
-              label="Status"
-              onChange={(e) => setStatus(e.target.value as StoryStatus)}
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={userFilter}
+              label="User"
+              onChange={handleUserChange}
               sx={{
                 backgroundColor: "white",
-                borderRadius: "4px",
                 color: "black",
+                borderRadius: 1,
                 "& .MuiOutlinedInput-notchedOutline": {
-                  border: "none",
+                  borderColor: "gray",
+                },
+                "& .MuiSvgIcon-root": {
+                  color: "black",
                 },
               }}
             >
-              <MenuItem value="Backlog">Backlog</MenuItem>
-              <MenuItem value="In Progress">In Progress</MenuItem>
-              <MenuItem value="Testing">Testing</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem value="all">All Users</MenuItem>
+              {projectUsers.map((user: User) => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: { sm: "12.5rem" },
+              width: { xs: "100%", sm: "15.625rem" },
+              mb: { xs: "0.5rem", sm: 0 },
+            }}
+          >
+            <InputLabel
+              sx={{
+                "&.Mui-focused": { color: "primary.main" },
+                backgroundColor: "white",
+                paddingLeft: "0.25rem",
+                paddingRight: "0.25rem",
+                borderRadius: "0.25rem",
+              }}
+              id="demo-multiple-checkbox-label"
+            >
+              Priority
+            </InputLabel>
+
+            <Select
+              labelId="demo-multiple-checkbox-label"
+              id="demo-multiple-checkbox"
+              multiple
+              value={priorityfilter}
+              onChange={handleStatusChange}
+              renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+              sx={{
+                backgroundColor: "white",
+                color: "black",
+                borderRadius: "0.25rem",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "gray",
+                },
+                "& .MuiSvgIcon-root": {
+                  color: "black",
+                },
+              }}
+            >
+              {["High", "Medium", "Low"].map((p) => {
+                return (
+                  <MenuItem key={p} value={p}>
+                    <Checkbox
+                      checked={priorityfilter.includes(p as Priority)}
+                      size="small"
+                      style={{ marginRight: "3rem" }}
+                    />
+                    <ListItemText primary={p} />
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
 
@@ -198,7 +308,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 
             <form onSubmit={handleSubmit}>
               <DialogContent>
-                <Stack spacing={3} sx={{ mt: 1 }}>
+                <Stack gap="1.5rem" sx={{ mt: "0.5rem" }}>
                   <TextField
                     label="Story Name"
                     fullWidth
@@ -276,7 +386,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
                 </Stack>
               </DialogContent>
 
-              <DialogActions sx={{ p: 3 }}>
+              <DialogActions sx={{ p: "1.5rem" }}>
                 <Button onClick={handleClose} color="inherit">
                   Cancel
                 </Button>

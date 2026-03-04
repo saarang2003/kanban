@@ -22,11 +22,15 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useUsers } from "../context/UserContext";
-import { useProjects } from "../context/ProjectContext"; // corrected hook
+import { useApp } from "../context/useApp";
 
 const MenuProps = {
-  PaperProps: { style: { maxHeight: 250, width: 250 } },
+  PaperProps: {
+    sx: {
+      maxHeight: "15.625rem", // 250px
+      width: "15.625rem",
+    },
+  },
 };
 
 // Form state type
@@ -38,8 +42,7 @@ interface ProjectFormData {
 
 const Header: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const { users: allUsers } = useUsers();
-  const { addProject } = useProjects();
+  const { users: allUsers, addProject, currentUser } = useApp();
 
   const initialState: ProjectFormData = {
     name: "",
@@ -86,7 +89,11 @@ const Header: React.FC = () => {
       component="nav"
       color="default"
       elevation={1}
-      sx={{ bgcolor: "white", borderRadius: "5px", mb: 2 }}
+      sx={{
+        bgcolor: "white",
+        borderRadius: "0.3125rem", // 5px
+        marginBottom: "1rem",
+      }}
     >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Button component={Link} to="/" color="inherit">
@@ -98,11 +105,11 @@ const Header: React.FC = () => {
           </Typography>
         </Button>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <Button
             variant="contained"
             onClick={handleOpen}
-            sx={{ borderRadius: "8px", textTransform: "none" }}
+            sx={{ borderRadius: "0.5rem", textTransform: "none" }}
           >
             Add Project
           </Button>
@@ -114,7 +121,7 @@ const Header: React.FC = () => {
 
             <form onSubmit={handleSubmit}>
               <DialogContent>
-                <Stack spacing={3} sx={{ mt: 1 }}>
+                <Stack spacing="1.5rem" sx={{ marginTop: "0.5rem" }}>
                   <TextField
                     label="Project Name"
                     fullWidth
@@ -141,7 +148,11 @@ const Header: React.FC = () => {
                       input={<OutlinedInput label="Team Users" />}
                       renderValue={(selected) => (
                         <Box
-                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: " 0.5rem",
+                          }}
                         >
                           {(selected as string[]).map((id) => {
                             const user = allUsers.find((u) => u.id === id);
@@ -163,7 +174,7 @@ const Header: React.FC = () => {
                 </Stack>
               </DialogContent>
 
-              <DialogActions sx={{ p: 3 }}>
+              <DialogActions sx={{ padding: "1.5rem" }}>
                 <Button onClick={handleClose} color="inherit">
                   Cancel
                 </Button>
@@ -176,8 +187,11 @@ const Header: React.FC = () => {
 
           <IconButton size="small">
             <Avatar
-              sx={{ width: 35, height: 35 }}
-              src="https://i.pravatar.cc/150?u=fake@pravatar.com"
+              sx={{
+                width: "2.1875rem", //35px
+                height: "2.1875rem",
+                bgcolor: currentUser?.avatarColor,
+              }}
             />
           </IconButton>
         </Box>
