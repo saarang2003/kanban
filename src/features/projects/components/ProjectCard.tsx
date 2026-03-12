@@ -1,4 +1,5 @@
 import {
+  Alert,
   Avatar,
   AvatarGroup,
   Box,
@@ -12,18 +13,25 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   OutlinedInput,
   Select,
+  Snackbar,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   type SelectChangeEvent,
+  type SnackbarCloseReason,
 } from "@mui/material";
 import React, { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import { Link } from "react-router-dom";
-import { useApp } from "../../../shared/context/useApp";
+import ShareIcon from "@mui/icons-material/Share";
+import { CheckCircleOutline } from "@mui/icons-material";
+import { useProjects } from "../context/ProjectContext";
+import { useUsers } from "../../users/context/UserContext";
 
 const MenuProps = {
   PaperProps: {
@@ -50,7 +58,11 @@ interface ProjectFormData {
 const ProjectCard: React.FC<ProjectCardProps> = React.memo(
   ({ id, name, description, users: projectUserIds, removeProject }) => {
     const [open, setOpen] = useState<boolean>(false);
-    const { projects, currentUser, updateProject, users: allUsers } = useApp();
+    const projects = useProjects((state) => state.projects);
+    const updateProject = useProjects((state) => state.updateProject);
+    const allUsers = useUsers((state) => state.users);
+    const currentUser = useUsers((state) => state.currentUser);
+    const [toast, setToast] = useState(false);
 
     const currentProject = projects.find((p) => p.id === id);
 
@@ -103,6 +115,26 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(
       e.preventDefault();
       updateProject(id, formData);
       handleClose();
+    };
+
+    const handleCopy = () => {
+      if (currentProject?.id) {
+        navigator.clipboard.writeText(
+          `${window.location.origin}/project/${id}/info`,
+        );
+      }
+      setToast(true);
+    };
+
+    const handleToastClose = (
+      _event: SyntheticEvent | Event,
+      reason?: SnackbarCloseReason,
+    ) => {
+      if (reason === "clickaway") {
+        return;
+      }
+
+      setToast(false);
     };
 
     return (
@@ -247,6 +279,39 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(
           >
             Archive Project
           </Button>
+
+          <Tooltip title="Share">
+            <IconButton
+              size="small"
+              onClick={handleCopy}
+              sx={{
+                bgcolor: "primary.main",
+                color: "white",
+                "&:hover": {
+                  bgcolor: "primary.dark",
+                },
+                p: "0.rem",
+              }}
+            >
+              <ShareIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Snackbar
+            open={toast}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            autoHideDuration={2000}
+            onClose={handleToastClose}
+          >
+            <Alert
+              onClose={handleToastClose}
+              severity="info"
+              icon={<CheckCircleOutline fontSize="inherit" />}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              Project link copied
+            </Alert>
+          </Snackbar>
         </CardActions>
       </Card>
     );

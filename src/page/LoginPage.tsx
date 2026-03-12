@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent } from "react";
+import React, { useEffect, useState, type ChangeEvent } from "react";
 import {
   TextField,
   Button,
@@ -8,10 +8,11 @@ import {
   Paper,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../shared/context/useApp";
+import { useUsers } from "../features/users/context/UserContext";
 
 const LoginPage: React.FC = () => {
-  const { login } = useApp();
+  const login = useUsers((state) => state.login);
+  const currentUser = useUsers((state) => state.currentUser);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -20,6 +21,12 @@ const LoginPage: React.FC = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/dashboard");
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();

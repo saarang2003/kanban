@@ -13,7 +13,6 @@ import {
   Collapse,
   Tooltip,
 } from "@mui/material";
-
 import {
   ChevronLeft,
   Menu as MenuIcon,
@@ -24,17 +23,21 @@ import {
 } from "@mui/icons-material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../context/useApp";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useProjects } from "../../features/projects/context/ProjectContext";
+import { useUsers } from "../../features/users/context/UserContext";
 
 const drawerWidthOpen = 240;
 const drawerWidthClosed = 60;
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC = React.memo(() => {
   const [open, setOpen] = useState<boolean>(false);
   const [projectsOpen, setProjectsOpen] = useState<boolean>(true);
   const navigate = useNavigate();
-  const { projects, logout, deleteUser, currentUser } = useApp();
+  const projects = useProjects((state) => state.projects);
+  const logout = useUsers((state) => state.logout);
+  const deleteUser = useUsers((state) => state.deleteUser);
+  const currentUser = useUsers((state) => state.currentUser);
 
   //filter project based on roles
   const visibleProjects = useMemo(() => {
@@ -94,7 +97,7 @@ const Sidebar: React.FC = () => {
       <List>
         {/* Dashboard */}
         <ListItem disablePadding>
-          <Tooltip title="Dashboard">
+          <Tooltip title="My Task">
             <ListItemButton
               onClick={() => navigate(`/userDashboard/${currentUser?.id}`)}
             >
@@ -126,7 +129,7 @@ const Sidebar: React.FC = () => {
                 <ListItemButton
                   key={project.id}
                   sx={{ pl: "2rem" }}
-                  onClick={() => navigate(`/project/${project.id}`)}
+                  onClick={() => navigate(`/project/${project.id}/info`)}
                 >
                   <Box
                     sx={{
@@ -175,6 +178,6 @@ const Sidebar: React.FC = () => {
       </List>
     </Drawer>
   );
-};
+});
 
 export default Sidebar;

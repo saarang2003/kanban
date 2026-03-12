@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useApp } from "./shared/context/useApp";
+import { useUsers } from "./features/users/context/UserContext";
 
 interface Props {
   children?: ReactNode;
 }
 
 const ProtectedRoute: React.FC<Props> = ({ children }) => {
-  const { currentUser } = useApp();
+  const currentUser = useUsers((state) => state.currentUser);
 
   // If NOT logged in then goes to login page
   if (!currentUser) {

@@ -14,6 +14,7 @@ export interface Story {
   assignedUserId: string;
   status: StoryStatus;
   createdDate: string; // ISO string
+  lastUpdated?: string;
 }
 
 // Array of stories

@@ -15,11 +15,11 @@ import {
 import { RoleList, type User } from "../features/users/types";
 import { getRandomHexColor } from "../features/users/utils/randomHex";
 import { useNavigate } from "react-router-dom";
-import { useApp } from "../shared/context/useApp";
+import { useUsers } from "../features/users/context/UserContext";
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register } = useApp();
+  const register = useUsers((state) => state.register);
 
   const [formData, setFormData] = useState({
     username: "",

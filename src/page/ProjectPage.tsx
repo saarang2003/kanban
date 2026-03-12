@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Outlet, useParams } from "react-router-dom";
 import { COLUMNS } from "../features/stories/types";
 import { Box, Container, Grid, Paper, Stack, Typography } from "@mui/material";
 import ProjectHeader from "../features/projects/components/ProjectHeader";
 import StoryCard from "../features/stories/components/StoryCard";
-import { useApp } from "../shared/context/useApp";
 import { Skeleton } from "@mui/material";
 import type { Priority } from "../shared/types/common";
+import { useStories } from "../features/stories/context/StoryContext";
+import { useProjects } from "../features/projects/context/ProjectContext";
 
 export const ProjectPageSkeleton = () => (
   <Box sx={{ p: "1.5rem", mt: "2.5rem" }}>
@@ -36,7 +37,9 @@ export const ProjectPageSkeleton = () => (
 const ProjectPage: React.FC = () => {
   // Type the route param -> current project id
   const { id } = useParams<{ id: string }>();
-  const { stories, addStory, updateStory, removeStory, projects } = useApp();
+  const stories = useStories((state) => state.stories);
+  const addStory = useStories((state) => state.addStory);
+  const projects = useProjects((state) => state.projects);
 
   // Filters are now tied to projectId
 
@@ -50,6 +53,14 @@ const ProjectPage: React.FC = () => {
     user: "all",
   });
 
+  const handlePriorityFilter = useCallback((priority: Priority[]) => {
+    setFilters((prev) => ({ ...prev, priorityFilter: priority }));
+  }, []);
+
+  const handleUserFilter = useCallback((userId: string) => {
+    setFilters((prev) => ({ ...prev, user: userId }));
+  }, []);
+
   const { priorityFilter, user: userFilter } = filters;
 
   // Find current project
@@ -60,7 +71,7 @@ const ProjectPage: React.FC = () => {
     if (!id) return [];
 
     return stories.filter((s) => {
-      const matchesProject = s.projectId === id;
+      const matchProjects = s.projectId === id;
 
       const matchesPriority =
         priorityFilter.length === 0 || priorityFilter.includes(s.priority); // If no status filter, show all. Otherwise, check if story's status is in the filter.
@@ -70,7 +81,7 @@ const ProjectPage: React.FC = () => {
 
       const matchesFilter = matchesPriority && matchesUser; // Story must match both filters to be shown.
 
-      return matchesProject && matchesFilter; // First check if story belongs to the project, then apply filters
+      return matchProjects && matchesFilter; // First check if story belongs to the project, then apply filters
     });
   }, [stories, id, priorityFilter, userFilter]);
 
@@ -95,17 +106,12 @@ const ProjectPage: React.FC = () => {
         addStories={addStory}
         users={projectData.users}
         priorityfilter={priorityFilter}
-        setPriorityFilter={(priority) =>
-          setFilters((prev) => ({ ...prev, priorityFilter: priority }))
-        }
+        setPriorityFilter={handlePriorityFilter}
         userFilter={userFilter}
-        setUserFilter={(userId) =>
-          setFilters((prev) => ({ ...prev, user: userId }))
-        }
+        setUserFilter={handleUserFilter}
       />
 
-      <Container maxWidth="xl">
-        <Box>Something here</Box>
+      <Container maxWidth={false} sx={{ width: "100%" }}>
         <Grid container columnSpacing="1.5rem" rowSpacing="1.5rem">
           {COLUMNS.map((status) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={status}>
@@ -128,8 +134,6 @@ const ProjectPage: React.FC = () => {
                     .map((story) => (
                       <StoryCard
                         key={story.id}
-                        updateStory={updateStory}
-                        removeStory={removeStory}
                         id={story.id}
                         // status={story.status}
                         story={story}

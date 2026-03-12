@@ -10,9 +10,11 @@ import {
   Typography,
 } from "@mui/material";
 import type React from "react";
-import { useApp } from "../../../shared/context/useApp";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMemo } from "react";
+import { useProjects } from "../context/ProjectContext";
+import { useStories } from "../../stories/context/StoryContext";
+import { useUsers } from "../../users/context/UserContext";
 
 export const ProjectInfoSkeleton: React.FC = () => (
   <Container
@@ -100,7 +102,10 @@ export const ProjectInfoSkeleton: React.FC = () => (
 );
 
 const ProjectInfo: React.FC = () => {
-  const { projects, users, stories, currentUser } = useApp();
+  const projects = useProjects((state) => state.projects);
+  const stories = useStories((state) => state.stories);
+  const users = useUsers((state) => state.users);
+  const currentUser = useUsers((state) => state.currentUser);
   const { id: projectId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -129,8 +134,9 @@ const ProjectInfo: React.FC = () => {
 
   return (
     <Container
-      maxWidth="lg"
+      maxWidth={false}
       sx={{
+        maxWidth: "100%",
         display: "flex",
         flexDirection: "column",
         gap: "2rem",

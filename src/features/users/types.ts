@@ -1,9 +1,12 @@
-export type UserRole =
-  | "Frontend Developer"
-  | "Backend Developer"
-  | "UI/UX Designer"
-  | "QA Engineer"
-  | "Admin";
+export const ROLES = [
+  "Frontend Developer",
+  "Backend Developer",
+  "UI/UX Designer",
+  "QA Engineer",
+  "Admin",
+] as const;
+
+export type UserRole = (typeof ROLES)[number];
 
 // User interface
 export interface User {
@@ -18,10 +21,4 @@ export interface User {
 export type Users = User[];
 
 // Export a usable role list
-export const RoleList: UserRole[] = [
-  "Frontend Developer",
-  "Backend Developer",
-  "UI/UX Designer",
-  "QA Engineer",
-  "Admin",
-];
+export const RoleList = ROLES;

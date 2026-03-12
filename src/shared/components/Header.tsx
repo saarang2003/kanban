@@ -20,9 +20,12 @@ import {
   FormControl,
   Stack,
   type SelectChangeEvent,
+  Tooltip,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useApp } from "../context/useApp";
+import { GlobalCommandPalette } from "./GlobalCommandPalette";
+import { useUsers } from "../../features/users/context/UserContext";
+import { useProjects } from "../../features/projects/context/ProjectContext";
 
 const MenuProps = {
   PaperProps: {
@@ -40,9 +43,11 @@ interface ProjectFormData {
   users: string[];
 }
 
-const Header: React.FC = () => {
+const Header: React.FC = React.memo(() => {
   const [open, setOpen] = useState(false);
-  const { users: allUsers, addProject, currentUser } = useApp();
+  const allUsers = useUsers((state) => state.users);
+  const currentUser = useUsers((state) => state.currentUser);
+  const addProject = useProjects((state) => state.addProject);
 
   const initialState: ProjectFormData = {
     name: "",
@@ -68,10 +73,14 @@ const Header: React.FC = () => {
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!formData.name.trim()) {
+      return;
+    }
+
     // Pass only name, description, and users to addProject
     addProject({
-      name: formData.name,
-      description: formData.description,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
       users: formData.users,
     });
 
@@ -95,15 +104,33 @@ const Header: React.FC = () => {
         marginBottom: "1rem",
       }}
     >
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <Button component={Link} to="/" color="inherit">
           <Typography
             variant="h6"
-            sx={{ flexGrow: 1, fontWeight: 700, color: "primary.main" }}
+            sx={{
+              flexGrow: 1,
+              fontWeight: 700,
+              color: "primary.main",
+            }}
           >
             KanbanFlow
           </Typography>
         </Button>
+
+        <Box
+          maxWidth="100%"
+          sx={{
+            display: { xs: "none", sm: "block" },
+          }}
+        >
+          <GlobalCommandPalette />
+        </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <Button
@@ -185,19 +212,21 @@ const Header: React.FC = () => {
             </form>
           </Dialog>
 
-          <IconButton size="small">
-            <Avatar
-              sx={{
-                width: "2.1875rem", //35px
-                height: "2.1875rem",
-                bgcolor: currentUser?.avatarColor,
-              }}
-            />
-          </IconButton>
+          <Tooltip title={currentUser?.name as string}>
+            <IconButton size="small">
+              <Avatar
+                sx={{
+                  width: "2.1875rem", //35px
+                  height: "2.1875rem",
+                  bgcolor: currentUser?.avatarColor,
+                }}
+              />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>
   );
-};
+});
 
 export default Header;

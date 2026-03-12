@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -40,6 +42,7 @@ interface StoryModalProps {
   }[];
   storyId: string | unknown;
   canEditOrDelete: boolean;
+  lastUpdated: string;
 }
 
 const StoryModal: React.FC<StoryModalProps> = ({
@@ -53,6 +56,7 @@ const StoryModal: React.FC<StoryModalProps> = ({
   projectUsers,
   storyId,
   canEditOrDelete,
+  lastUpdated,
 }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -164,6 +168,10 @@ const StoryModal: React.FC<StoryModalProps> = ({
             </FormControl>
           </Stack>
         </DialogContent>
+
+        <Box sx={{ paddingLeft: "2rem" }}>
+          Last Updated : <Chip label={lastUpdated} />
+        </Box>
 
         <DialogActions sx={{ p: "1.5rem" }}>
           <Button onClick={handleClose} color="inherit">

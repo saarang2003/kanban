@@ -1,22 +1,22 @@
 import React, { useMemo, useState } from "react";
 import { Box, Container, Grid, Paper, Stack, Typography } from "@mui/material";
-import { COLUMNS } from "../features/stories/types";
+import { COLUMNS, type Story } from "../features/stories/types";
 import StoryCard from "../features/stories/components/StoryCard";
-import { useApp } from "../shared/context/useApp";
 import UserHeader from "../features/users/components/UserHeader";
 import type { Priority } from "../shared/types/common";
 import { useParams } from "react-router-dom";
+import { useStories } from "../features/stories/context/StoryContext";
+import { useUsers } from "../features/users/context/UserContext";
 
 const UserDashboardPage: React.FC = () => {
   const { id: UserId } = useParams();
-
-  const { stories, updateStory, removeStory, currentUser } = useApp();
+  const stories = useStories((state) => state.stories);
+  const currentUser = useUsers((state) => state.currentUser);
 
   // filter stories assigned to users
   const userStories = useMemo(() => {
     if (!UserId) return [];
-
-    return stories.filter((story) => story.assignedUserId === UserId);
+    return stories.filter((story: Story) => story.assignedUserId === UserId);
   }, [stories, UserId]);
 
   // State for filters
@@ -30,7 +30,7 @@ const UserDashboardPage: React.FC = () => {
 
   // Filter stories by priority and search term
   const filteredStories = useMemo(() => {
-    return userStories.filter((s) => {
+    return userStories.filter((s: Story) => {
       const matchesPriority =
         filters.priorityFilter.length === 0 ||
         filters.priorityFilter.includes(s.priority);
@@ -71,7 +71,7 @@ const UserDashboardPage: React.FC = () => {
           }
         />
 
-        <Container maxWidth="xl">
+        <Container maxWidth={false} sx={{ width: "100%" }}>
           <Grid container columnSpacing="1.5rem" rowSpacing="1.5rem">
             {COLUMNS.map((status) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={status}>
@@ -94,15 +94,9 @@ const UserDashboardPage: React.FC = () => {
 
                   <Stack spacing="1rem">
                     {filteredStories
-                      .filter((s) => s.status === status)
-                      .map((story) => (
-                        <StoryCard
-                          key={story.id}
-                          updateStory={updateStory}
-                          removeStory={removeStory}
-                          id={story.id}
-                          story={story}
-                        />
+                      .filter((s: Story) => s.status === status)
+                      .map((story: Story) => (
+                        <StoryCard key={story.id} id={story.id} story={story} />
                       ))}
                   </Stack>
                 </Paper>

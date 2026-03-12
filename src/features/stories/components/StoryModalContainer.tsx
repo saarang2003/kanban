@@ -5,7 +5,10 @@ import type { User } from "../../users/types";
 import { useState, type SyntheticEvent } from "react";
 import type { SelectChangeEvent } from "@mui/material";
 import StoryModal from "./StoryModal";
-import { useApp } from "../../../shared/context/useApp";
+import { useStories } from "../context/StoryContext";
+import { useProjects } from "../../projects/context/ProjectContext";
+import { useUsers } from "../../users/context/UserContext";
+import type { Project } from "../../projects/types";
 
 export interface StoryFormData {
   title: string;
@@ -18,14 +21,19 @@ export interface StoryFormData {
 
 const StoryModalContainer: React.FC = () => {
   const { storyId, id: projectId } = useParams();
-  const { stories, updateStory, removeStory, projects, users, currentUser } =
-    useApp();
+  const stories = useStories((state) => state.stories);
+  const updateStory = useStories((state) => state.updateStory);
+  const removeStory = useStories((state) => state.removeStory);
+  const projects = useProjects((state) => state.projects);
+  const users = useUsers((state) => state.users);
+  const currentUser = useUsers((state) => state.currentUser);
   const navigate = useNavigate();
 
   // Find the story based on the storyId from params
   const story = stories.find((s) => s.id === storyId);
 
-  const project = projects.find((p) => p.id === projectId);
+  const project = projects.find((p: Project) => p.id === projectId);
+
   // Get users of the project, filter out undefined
   const projectUsers: User[] =
     project?.users
@@ -89,9 +97,14 @@ const StoryModalContainer: React.FC = () => {
       storyPoints: Number(formData.storyPoints),
       assignedUserId: formData.assignedUserId,
       status: formData.status,
+      lastUpdated: new Date().toISOString(),
     });
     handleClose();
   };
+
+  const lastUpdated = story?.lastUpdated
+    ? new Date(story.lastUpdated).toLocaleDateString()
+    : "Not updated yet";
 
   const handleRemoveStory = (id: string) => {
     if (window.confirm("Are you sure you want to delete this story?")) {
@@ -112,6 +125,7 @@ const StoryModalContainer: React.FC = () => {
       formData={formData}
       storyId={storyId}
       canEditOrDelete={canEditOrDelete}
+      lastUpdated={lastUpdated}
     />
   );
 };
